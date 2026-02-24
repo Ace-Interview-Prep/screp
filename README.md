@@ -1,12 +1,8 @@
-# scrappy-file
+# pgrep
 
-File system utilities for the scrappy web scraping library, plus **pgrep** - a grep-like CLI that uses Parsec parsers instead of regex.
+A grep-like CLI that uses Parsec parser combinators instead of regex.
 
-## pgrep
-
-Search files using Parsec parser patterns instead of regular expressions.
-
-### Installation
+## Installation
 
 ```bash
 cabal build pgrep
@@ -18,14 +14,19 @@ Make sure `~/.local/bin` is in your PATH:
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-### Usage
+Or install from Hackage:
+```bash
+cabal install pgrep
+```
+
+## Usage
 
 ```bash
 pgrep PATTERN FILE...
 pgrep [OPTIONS] PATTERN FILE...
 ```
 
-### DSL Primitives
+## DSL Primitives
 
 | Primitive | Example | Description |
 |-----------|---------|-------------|
@@ -41,7 +42,7 @@ pgrep [OPTIONS] PATTERN FILE...
 | `oneOf` | `oneOf "abc"` | Match one of chars |
 | `noneOf` | `noneOf "xyz"` | Match none of chars |
 
-### DSL Combinators
+## DSL Combinators
 
 | Combinator | Syntax | Description |
 |------------|--------|-------------|
@@ -55,14 +56,15 @@ pgrep [OPTIONS] PATTERN FILE...
 | Between | `between '(' ')' p` | Parse between delimiters |
 | Count | `count 3 p` | Exactly n repetitions |
 | ManyTill | `manyTill p end` | Non-greedy: match p until end |
+| Ref | `ref "name"` | Named parser from import file |
 
-### Examples
+## Examples
 
 ```bash
 # Find digits
 pgrep 'some digit' file.txt
 
-# Find email patterns
+# Find email patterns (inline)
 pgrep 'some alphaNum <+> char '\''@'\'' <+> some alphaNum <+> char '\''.'\'' <+> some letter' contacts.txt
 
 # Find TODO comments
@@ -81,11 +83,63 @@ pgrep --json 'some digit' file.txt
 pgrep 'string "START" <+> manyTill anyChar (string "END")' file.txt
 ```
 
-### Options
+## Using Custom Parsers (--import)
+
+For complex patterns, define parsers in a Haskell file and reference them with `ref`:
+
+**Parsers.hs:**
+```haskell
+module Parsers (parsers) where
+
+import Text.Parsec
+import Text.Parsec.String
+import Data.Map (Map)
+import qualified Data.Map as Map
+
+parsers :: Map String (Parser String)
+parsers = Map.fromList
+  [ ("email", email)
+  , ("phone", phone)
+  ]
+
+email :: Parser String
+email = do
+  user <- many1 alphaNum
+  char '@'
+  domain <- many1 alphaNum
+  char '.'
+  tld <- many1 letter
+  pure $ user ++ "@" ++ domain ++ "." ++ tld
+
+phone :: Parser String
+phone = do
+  a <- count 3 digit
+  char '-'
+  b <- count 3 digit
+  char '-'
+  c <- count 4 digit
+  pure $ a ++ "-" ++ b ++ "-" ++ c
+```
+
+**Usage:**
+```bash
+# Find emails using custom parser
+pgrep --import Parsers.hs 'ref "email"' contacts.txt
+
+# Find phone numbers
+pgrep --import Parsers.hs 'ref "phone"' contacts.txt
+```
+
+Requirements for custom parsers:
+- Module must export `parsers :: Map String (Parser String)`
+- Requires `parsec` and `containers` packages installed
+
+## Options
 
 ```
 -r, --recursive      Search directories recursively
 -e, --extension EXT  Only search files with extension (e.g., .hs, .txt)
+-i, --import FILE    Haskell file with named parsers (for 'ref "name"')
 -v, --verbose        Verbose output with full match text
 -c, --count          Only print count of matches
 -q, --quiet          Quiet mode (exit code only)
@@ -93,7 +147,7 @@ pgrep 'string "START" <+> manyTill anyChar (string "END")' file.txt
 --json               Output results as JSON
 ```
 
-### Output Format
+## Output Format
 
 Default output is grep-like:
 ```
@@ -111,4 +165,5 @@ The `Scrappy.Grep.*` modules expose:
 - `Scrappy.Grep.DSL.Parser` - Parse DSL strings to AST
 - `Scrappy.Grep.DSL.Interpreter` - Convert AST to Parsec parsers
 - `Scrappy.Grep.Search` - File/directory search functions
+- `Scrappy.Grep.Config` - External parser execution via runghc
 - `Scrappy.Grep.Output` - Result formatting
