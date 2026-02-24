@@ -85,7 +85,7 @@ main = do
   opts <- execParser $ info (optionsParser <**> helper)
     ( fullDesc
    <> progDesc "Search files using Parsec parser patterns"
-   <> header "pgrep - grep with parser combinators"
+   <> header "screp - grep with parser combinators"
     )
 
   -- Parse the DSL pattern
@@ -118,7 +118,7 @@ runWithRefs opts ast = do
   case optImport opts of
     Nothing -> do
       hPutStrLn stderr "Pattern uses 'ref' but no --import file specified."
-      hPutStrLn stderr "Usage: pgrep --import Parsers.hs 'ref \"email\"' file.txt"
+      hPutStrLn stderr "Usage: screp --import Parsers.hs 'ref \"email\"' file.txt"
       exitFailure
     Just importPath -> do
       -- Extract the ref names (for now, only support single ref patterns)

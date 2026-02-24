@@ -1,12 +1,12 @@
-# pgrep
+# screp
 
 A grep-like CLI that uses Parsec parser combinators instead of regex.
 
 ## Installation
 
 ```bash
-cabal build pgrep
-cabal install pgrep
+cabal build screp
+cabal install screp
 ```
 
 Make sure `~/.local/bin` is in your PATH:
@@ -16,14 +16,14 @@ export PATH="$HOME/.local/bin:$PATH"
 
 Or install from Hackage:
 ```bash
-cabal install pgrep
+cabal install screp
 ```
 
 ## Usage
 
 ```bash
-pgrep PATTERN FILE...
-pgrep [OPTIONS] PATTERN FILE...
+screp PATTERN FILE...
+screp [OPTIONS] PATTERN FILE...
 ```
 
 ## DSL Primitives
@@ -62,25 +62,25 @@ pgrep [OPTIONS] PATTERN FILE...
 
 ```bash
 # Find digits
-pgrep 'some digit' file.txt
+screp 'some digit' file.txt
 
 # Find email patterns (inline)
-pgrep 'some alphaNum <+> char '\''@'\'' <+> some alphaNum <+> char '\''.'\'' <+> some letter' contacts.txt
+screp 'some alphaNum <+> char '\''@'\'' <+> some alphaNum <+> char '\''.'\'' <+> some letter' contacts.txt
 
 # Find TODO comments
-pgrep 'string "TODO"' -r ./src/
+screp 'string "TODO"' -r ./src/
 
 # Search recursively with extension filter
-pgrep -r -e .hs 'string "import"' ./src/
+screp -r -e .hs 'string "import"' ./src/
 
 # Count matches
-pgrep -c 'digit' data.txt
+screp -c 'digit' data.txt
 
 # JSON output
-pgrep --json 'some digit' file.txt
+screp --json 'some digit' file.txt
 
 # Non-greedy matching: find everything between X and Y
-pgrep 'string "START" <+> manyTill anyChar (string "END")' file.txt
+screp 'string "START" <+> manyTill anyChar (string "END")' file.txt
 ```
 
 ## Using Custom Parsers (--import)
@@ -124,10 +124,10 @@ phone = do
 **Usage:**
 ```bash
 # Find emails using custom parser
-pgrep --import Parsers.hs 'ref "email"' contacts.txt
+screp --import Parsers.hs 'ref "email"' contacts.txt
 
 # Find phone numbers
-pgrep --import Parsers.hs 'ref "phone"' contacts.txt
+screp --import Parsers.hs 'ref "phone"' contacts.txt
 ```
 
 Requirements for custom parsers:
