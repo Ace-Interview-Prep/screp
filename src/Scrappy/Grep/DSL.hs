@@ -3,6 +3,7 @@
 module Scrappy.Grep.DSL
   ( ParserExpr(..)
   , MatchResult(..)
+  , MatchContext(..)
   , containsRef
   , extractRefs
   ) where
@@ -46,6 +47,13 @@ data MatchResult = MatchResult
   , mrLine      :: Int       -- Starting line (1-indexed)
   , mrCol       :: Int       -- Starting column (1-indexed)
   , mrMatchText :: String    -- The matched text (may contain newlines)
+  , mrContext   :: Maybe MatchContext  -- Optional context lines
+  } deriving (Show, Eq, Generic)
+
+-- | Context lines around a match
+data MatchContext = MatchContext
+  { mcBefore :: [String]    -- Lines before the match
+  , mcAfter  :: [String]    -- Lines after the match
   } deriving (Show, Eq, Generic)
 
 -- | Check if a ParserExpr contains any PRef nodes

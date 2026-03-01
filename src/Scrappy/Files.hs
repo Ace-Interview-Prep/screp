@@ -16,18 +16,21 @@ import System.Directory
 
 
 -- | Recursively lists all files in a directory, returning absolute file paths.
+-- Silently skips directories that cannot be read (permission denied, etc.)
 listFilesRecursive :: FilePath -> IO [FilePath]
-listFilesRecursive dir = do
-    contents <- listDirectory dir         -- Get directory contents
-    paths <- forM contents $ \name -> do
-        let fullPath = dir </> name        -- Create full path
-        isDir <- doesDirectoryExist fullPath
-        if isDir
-            then listFilesRecursive fullPath  -- Recursively search subdirectories
-            else do
-                absPath <- makeAbsolute fullPath  -- Get absolute path in IO context
-                return [absPath]                 -- Wrap in list for concatenation
-    return (concat paths)  -- Flatten list of lists
+listFilesRecursive dir = go dir `catch` (\(_ :: IOException) -> pure [])
+  where
+    go d = do
+        contents <- listDirectory d
+        paths <- forM contents $ \name -> do
+            let fullPath = d </> name
+            isDir <- doesDirectoryExist fullPath
+            if isDir
+                then listFilesRecursive fullPath
+                else do
+                    absPath <- makeAbsolute fullPath
+                    return [absPath]
+        return (concat paths)
 
 
 searchFile :: ScraperT a -> FilePath -> IO Bool

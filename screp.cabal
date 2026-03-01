@@ -46,6 +46,7 @@ executable screp
                      , directory >=1.3.8 && <1.4
                      , filepath >=1.5.4 && <1.6
                      , containers >=0.7 && <0.8
+                     , parsec >=3.1.18 && <3.2
   hs-source-dirs:     app
   default-language:   Haskell2010
   ghc-options:        -Wall -threaded -rtsopts
