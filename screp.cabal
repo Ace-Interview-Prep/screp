@@ -18,6 +18,10 @@ category:            Text, Console
 build-type:          Simple
 extra-source-files:  README.md, LICENSE
 
+source-repository head
+  type:     git
+  location: https://github.com/Ace-Interview-Prep/screp.git
+
 library
   exposed-modules:    Scrappy.Files
                     , Scrappy.Grep.DSL
